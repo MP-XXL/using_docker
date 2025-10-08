@@ -1,0 +1,4 @@
+FROM python:3.11.13-slim
+WORKDIR /app
+COPY recharge.py .
+CMD ["python", "recharge.py"]
