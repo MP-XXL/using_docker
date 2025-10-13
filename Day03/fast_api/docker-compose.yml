@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: dimka90/fastapi:v1.0-slim
+    container_name: fastapi-compose-container
+    ports:
+      - "8000:8000"
+    evironment:
+      -ENV=production
+    restart: unless-stopped
+
