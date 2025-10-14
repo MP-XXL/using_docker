@@ -52,7 +52,7 @@ def get_names_id(userId: int):
     if userId not in db:
         raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail= "Id does not exist"
+                detail = "Id does not exist"
                 )
     return db[userId]
 
@@ -61,7 +61,7 @@ def create_user(user: User):
     if not user.userId or not user.name:
         raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
-                details= "All fields are required!"
+                detail = "All fields are required!"
                 )
 
     new_user = User(
