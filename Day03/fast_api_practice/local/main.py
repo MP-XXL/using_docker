@@ -41,12 +41,12 @@ def get_user_id(user_id: int):
         return "User with ID does not exist!"
 
 @app.get("/get_user_by_name/{username}")
-async def get_user_name(name: str):
+def get_user_name(username: str):
     for user in users:
-        if users[user]["name"] == name:
+        if users[user]["name"] == username:
             return users[user]
-        else:
-            return "No user with that name!"
+    else:
+        return "No user with that name!"
 
 @app.post("/add_user/{user_id}")
 def add_user(userId: int, user: CreateUser):
