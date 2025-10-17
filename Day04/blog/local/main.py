@@ -80,7 +80,7 @@ def update_post(post_id: int, post: UpdatePost):
                 "message": "Post updated successfully!"
                 }
 
-@app.delete("/posts/delete/{post_id}")
+@app.delete("/posts/{post_id}")
 def delete_post(post_id: int):
     if post_id not in posts:
         raise HTTPException(
