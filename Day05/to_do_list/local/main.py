@@ -31,7 +31,7 @@ class Database:
         self._tasks = {}
 
     def add(self, task: Task):
-        self._tasks.update({task.task_id:task})
+        self._tasks.update({task.task_id: task})
 
     def show_added(self, task: Task):
         added_task = {task.task_id: task}
