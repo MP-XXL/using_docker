@@ -212,7 +212,7 @@ def create_book(book: BookCreate):
                 book_id = db._current_id,
                 title = book.title,
                 author = book.author,
-                category = BookCategory.FICTION,
+                category = book.category,
                 published_date = book.published_date
                 )
     db.add_book(new_book)
