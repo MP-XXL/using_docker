@@ -271,6 +271,7 @@ def delete_book(book_id: int):
         if book.book_id == book_id:
             db.delete_book(book_id)
             return {
+                    "success": True
                     "message": "Book deleted successfully"
                     }
     else:
