@@ -77,11 +77,16 @@ class Database:
                 detail = "Deleted"
                 )
 
-
-
-
-    def increment_task_id(self):
+    def increment_task_id(self, user_id: int):
         self.task_id += 1
+        """for task in db_instance._tasks:
+            if task != user_id:
+                self.task_id += 1
+                return
+    
+        else:
+            task_id = self._tasks[user_id].task.task_id + 1
+            self.task_id = task_id"""
 
     def add_task(self, user_id: int, task: TaskInDb):
         self._tasks.setdefault(user_id, []).append(task)
@@ -91,15 +96,52 @@ class Database:
 
     def username_get_task(self, username: str):
         for user, user_details in self._users.items():
-            if user_details.username == username:
+            if user_details.username == username.lower():
                 return self._tasks[user]
         else:
             raise USER_NOT_FOUND_ERROR()
 
+    def user_task_delete(self, user_id: int, task_id: int):
+        for task in self._tasks[user_id]:
+            if task.task_id != task_id:
+                raise HTTPException(
+                        status_code = status.HTTP_404_NOT_FOUND,
+                        detail = "Task not found"
+                        )
+            if task.task_id == task_id:
+                value = self._tasks[user_id].index(task)
+                del self._tasks[user_id][value]
+                raise HTTPException(
+                        status_code = status.HTTP_204_NO_CONTENT,
+                        detail = "Deleted"
+                        )
 
+    def task_title_search(self, user_id: int, task_title: str):
+        for task in self._tasks[user_id]:
+            if task.title != task_title.lower():
+                raise HTTPException(
+                        status_code = status.HTTP_404_NOT_FOUND,
+                        detail = "Task not found"
+                        )
+            if task.title == task_title.lower():
+                return {
+                        "success": True,
+                        "data": task,
+                        "message": "Task match found"
+                        }
 
+    def user_tasks_sort(self, user_id: int):
+        users_tasks = []
+        for _, user_tasks in self._tasks.items():
+            users_tasks.append(user_tasks)
+        sorted_task = sorted(users_tasks)
+        return sorted_task
+        
+
+        
 
 db_instance = Database()
+
 
 # 
 #END POINTS
@@ -163,7 +205,7 @@ def delete_user(user_id: int):
 
 
 @app.post("/users/tasks")
-def add(task: TaskCreate, user_id: int):
+def add_task(task: TaskCreate, user_id: int):
     if user_id not in db_instance._users:
         raise USER_NOT_FOUND_ERROR()
 
@@ -175,7 +217,7 @@ def add(task: TaskCreate, user_id: int):
             updated_at = datetime.now(),
             is_completed = False
             )
-    db_instance.increment_task_id()
+    db_instance.increment_task_id(user_id)
     task = db_instance.add_task(user_id=user_id, task= new_task)
 
     return {
@@ -192,5 +234,20 @@ def get_all_tasks():
 def get_task_by_username(username: str):
     return db_instance.username_get_task(username)
 
-@app.delete("tasks/users")
-def delete_user_task(user_id: int)
+@app.delete("/tasks/users")
+def delete_user_task(user_id: int, task_id: int):
+    if user_id not in db_instance._users:
+        raise USER_NOT_FOUND_ERROR()
+    return db_instance.user_task_delete(user_id, task_id)
+
+@app.get("/queries/tasks/{tasK-title}")
+def search_task_title(user_id: int, task_title: str):
+    if user_id not in db_instance._users:
+        raise USER_NOT_FOUND_ERROR()
+    return db_instance.task_title_search(user_id, task_title)
+
+@app.get("/user/tasks")
+def sort_user_tasks(user_id: int):
+    if user_id not in db_instance._users:
+        raise USER_NOT_FOUND_ERROR()
+    return db_instance.user_tasks_sort(user_id)
