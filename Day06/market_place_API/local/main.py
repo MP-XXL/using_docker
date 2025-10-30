@@ -83,7 +83,7 @@ from datetime import datetime
 from typing import List, Dict
 from enum import Enum
 
-app = FastAPI()
+app = FastAPI(title="Market Place API")
 
 class VENDOR_ID_NOT_FOUND(HTTPException):
     def __init__(self, status_code=status.HTTP_404_NOT_FOUND, detail="Vendor not found"):
@@ -106,12 +106,12 @@ class ProduceCategory(str, Enum):
 class Vendor(BaseModel):
     name: str
     market_location: MarketLocation
-    phone: int
+    phone: str
 
 class UpdateVendor(BaseModel):
     name: str | None = None
     market_location: MarketLocation | None = None
-    phone: int | None = None
+    phone: str | None = None
 
 
 class VendorCreate(Vendor):
@@ -123,11 +123,13 @@ class Produce(BaseModel):
     quantity_kg: float 
     price_per_kg: float 
     category: ProduceCategory
-    is_available: bool
+    #is_available: bool
 
 
 class ProduceCreate(Produce):
     produce_id: int
+    is_available: bool
+
 
 class Database:
     def __init__(self):
@@ -236,6 +238,7 @@ def add_produce(vendor_id: int, produce: Produce):
     new_produce = ProduceCreate(
             **produce.model_dump(),
             produce_id = db_instance.produce_id,
+            is_available = True
             )
 
     db_instance.create_produce(vendor_id, new_produce)
