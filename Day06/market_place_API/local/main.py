@@ -151,6 +151,7 @@ class Database:
                     detail = "User already exists"
                     )
         self._vendors.update({vendor.vendor_id: vendor})
+        self._produce.update({vendor.vendor_id: []})
 
     def get_all_vendors(self):
         return {
@@ -163,11 +164,11 @@ class Database:
         for vendor, produce in self._produce.items():
             if vendor == vendor_id:
                 data = {vendor_id: produce}
-            return {
-                "success": True,
-                "data": data,
-                "message": "Displaying vendor produce with ID"
-                }
+                return {
+                    "success": True,
+                    "data": data,
+                    "message": "Displaying vendor with ID and produce"
+                    }
 
     def create_produce(self, vendor_id: int, produce: ProduceCreate):
         self._produce.setdefault(vendor_id, []).append(produce)
@@ -186,6 +187,13 @@ class Database:
                 "data": data,
                 "message": "Vendor details updated successfully"
                 }
+
+    def vendor_delete(self, vendor_id: int):
+        del self._vendors[vendor_id]
+        raise HTTPException(
+                status_code = status.HTTP_204_NO_CONTENT,
+                detail = "Vendor deleted successfully"
+                )
 
 
 db_instance = Database()
@@ -257,3 +265,8 @@ def update_vendor(vendor_id: int, vendor: UpdateVendor):
 
     return db_instance.vendor_update(vendor_id, vendor)
 
+@app.delete("/vendors/{vendor_id}")
+def delete_vendor(vendor_id: int):
+    if vendor_id not in db_instance._vendors:
+        raise VENDOR_ID_NOT_FOUND
+    return db_instance.vendor_delete(vendor_id)
