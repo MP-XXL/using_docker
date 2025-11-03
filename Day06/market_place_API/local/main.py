@@ -154,6 +154,9 @@ class OrderInDb(Order):
     order_date: datetime
     status: str
 
+class OrderUpdate(BaseModel):
+    status: str | None = None
+
 class Database:
     def __init__(self):
         self._vendors: Dict[int, VendorCreate] = {}
@@ -345,6 +348,23 @@ class Database:
                 "message": "Produce updated successfully"
                 }
 
+    def produce_update_quantity(self, produce_id: int, item: int, position: int, produce: UpdateProduce):
+        if produce.name != None:
+            self._produce[item][position].name = produce.name
+        if produce.quantity_kg != None:
+            self._produce[item][position].quantity_kg = produce.quantity_kg
+        if produce.price_per_kg != None:
+            self._produce[item][position].price_per_kg = produce.price_per_kg
+        if produce.category != None:
+            self._produce[item][position].category = produce.category
+
+        return {
+                "success": True,
+                "data": self._produce[item][position],
+                "message": "Produce quantity updated successfully"
+                }
+
+
     def produce_delete(self, produce_id: int, item, position: int):
         del self._produce[item][position]
         raise HTTPException(
@@ -353,12 +373,37 @@ class Database:
                 )
 
 
-
-
-
-
     def store_order(self, order: OrderInDb):
         self._orders.append(order)
+
+    def all_orders(self):
+        data = self._orders
+        return {
+                "success": True,
+                "data": data,
+                "message": "Displaying all orders"
+                }
+
+    def order_by_id(self, order_id: int, position: int):
+        return {
+                "success": True,
+                "data": self._orders[position],
+                "message": "Displaying order for order ID"
+                }
+        
+    def order_update(self, order_id: int, position: int, order: OrderUpdate):
+        self._orders[position].status = order.status
+        return {
+                "success": True,
+                "data": self._orders[position],
+                "message": "Order updated successfully"
+                }
+    def order_delete(self, position):
+        del self._orders[position]
+        raise HTTPException(
+                status_code = status.HTTP_204_NO_CONTENT,
+                detail = "Order deleted"
+                )
 
 
 db_instance = Database()
@@ -478,8 +523,18 @@ def update_produce(produce_id: int, produce: UpdateProduce):
                 )
 
 @app.patch("/produce/{produce_id}")
-def update_produce_quantity(produce_id: int):
-    pass
+def update_produce_quantity(produce_id: int, produce: UpdateProduce):
+    for item, produce_details in db_instance._produce.items():
+        for detail in produce_details:
+            if detail.produce_id == produce_id:
+                position = produce_details.index(detail)
+                return db_instance.produce_update_quantity(produce_id, item, position, produce)
+    else:
+        raise HTTPException(
+                status_code = status.HTTP_404_NOT_FOUND,
+                detail = "Produce ID not found"
+                )
+
 
 @app.delete("/produce/{produce_id}")
 def delete_produce(produce_id: int):
@@ -493,7 +548,6 @@ def delete_produce(produce_id: int):
                 status_code = status.HTTP_404_NOT_FOUND,
                 detail = "Produce ID not found"
                 )
-
 
 
 @app.post("/orders")
@@ -537,3 +591,44 @@ def order_placement(order: Order):
             "data": new_order,
             "message": "Order placed successfully"
             }
+
+@app.get("/orders")
+def get_all_orders():
+    return db_instance.all_orders()
+
+@app.get("/details/orders/{order_id}")
+def get_order_details(order_id: int):
+    for order in db_instance._orders:
+        if order.order_id == order_id:
+            position = db_instance._orders.index(order)
+            return db_instance.order_by_id(order_id, position)
+    else:
+        raise HTTPException(
+                status_code = status.HTTP_404_NOT_FOUND,
+                detail = "Order ID not found"
+                )
+
+@app.patch("/orders/{order_id}")
+def update_order_status(order_id: int, order: OrderUpdate):
+    for orders in db_instance._orders:
+        if orders.order_id == order_id:
+            position = db_instance._orders.index(orders)
+            return db_instance.order_update(order_id, position, order)
+    else:
+        raise HTTPException(
+                status_code = status.HTTP_404_NOT_FOUND,
+                detail = "Order ID not found"
+                )
+
+@app.delete("/orders/{order_id}")
+def delete_order(order_id: int):
+    for order in db_instance._orders:
+        if order.order_id == order_id:
+            position = db_instance._orders.index(order)
+            return db_instance.order_delete(position)
+    else:
+        raise HTTPException(
+                status_code = status.HTTP_404_NOT_FOUND,
+                detail = "Order ID not found"
+                )
+
