@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  db:
+    image: mysql:9-oracle
+    container_name: mysql_trial
+    environment:
+      MYSQL_DATABASE: my_database
+      MYSQL_USER: new_user
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_PASSWORD: password
+    ports:
+      - "3307:3306"
+
+  my_app:
+    build: .
+    image: python:3.18-slim
+    container: my_todo_app
+    environment:
+
