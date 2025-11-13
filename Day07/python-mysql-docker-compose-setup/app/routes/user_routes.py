@@ -27,12 +27,27 @@ def creat_user(user: User):
         created_at = datetime.now(),
         updated_at = datetime.now()
     )
+    # CREATE_USER = """
+    # INSERT INTO users(username, email, password) VALUES(%s, %s, %s); ############# ALTERNATIVE METHOD
+    # """
     with db.get_cursor() as cursor:
-        cursor.execute(queries.CREATE_USER)
-    # db.add(new_user)
-    # db.commit()
-    # db.refresh(new_user)
-
+        cursor.execute(queries.CREATE_USER, (user.username, user.email, user.password))
+    
     return {
         "data": new_user
     }
+
+@router.patch("/users/{user_id}")
+def update_user(user_id: int, user: UserUpdate):
+    try:
+        if not user_id:
+            raise Exception
+        else:
+            pass
+    except Exception as e:
+        raise HTTPException(
+                status_code = status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail = "User entered an invalid input"
+            )
+    with db.get_cursor() as cursor:
+        cursor.execute(queries.UPDATE_USER, ())

@@ -4,7 +4,7 @@ from typing import List, Optional, Dict
 from .database.database import db
 from .raw_sql import queries
 #from .controller import home
-from .routes import user_routes
+from .routes import user_routes, todo_routes
 import logging
 import time
 
@@ -18,6 +18,7 @@ app = FastAPI(
 
 database_ready = False
 app.include_router(user_routes.router)
+app.include_router(todo_routes.router)
 
 @app.on_event("startup")
 async def startup_event():
@@ -38,6 +39,8 @@ async def startup_event():
                 with db.get_cursor() as cursor:
                     cursor.execute(queries.CREATE_USERS_TABLE)
                     logger.info("users table initialized successfully")
+                    cursor.execute(queries.CREATE_TODOS_TABLE)
+                    logger.info("todos table initialized successfully")
                 
                 database_ready = True
                 logger.info("🎉 Application started successfully!")
@@ -55,13 +58,5 @@ async def startup_event():
         logger.error("Failed to connect to database after all retries")
         database_ready = False
         # Don't raise exception - let the app start and retry on first request
-
-
-# @app.get("/")
-# def home():
-#     return {
-#         "success": True,
-#         "message": "Welcome to todo hompage!"
-#     }
 
 # @app.get("/")(home)

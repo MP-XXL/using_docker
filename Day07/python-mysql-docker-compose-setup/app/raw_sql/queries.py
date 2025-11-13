@@ -9,7 +9,21 @@ CREATE TABLE IF NOT EXISTS users(
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL  
 );
 """
-# user: User
 CREATE_USER = """
-INSERT INTO users(username, email, password) VALUES(user.username, user.email, user.password);
+INSERT INTO users(username, email, password) VALUES(%s, %s, %s);
+"""
+
+CREATE_TODOS_TABLE = """
+CREATE TABLE IF NOT EXISTS todos(
+    id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+    title VARCHAR(255) UNIQUE NOT NULL,
+    user_id INT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+"""
+
+CREATE_TODO = """
+INSERT INTO todos(title, user_id) VALUES(%s, %s);
 """
