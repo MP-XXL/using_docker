@@ -27,3 +27,13 @@ CREATE TABLE IF NOT EXISTS todos(
 CREATE_TODO = """
 INSERT INTO todos(title, user_id) VALUES(%s, %s);
 """
+UPDATE_TODO = """
+UPDATE todos SET title = %s WHERE user_id = %s;
+"""
+
+UPDATE_USER = """
+UPDATE users SET username = %s,  email = %s, password = %s WHERE id = %s;
+"""
+DELETE_USER = """
+DELETE FROM users WHERE id = %s;
+"""

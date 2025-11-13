@@ -1,10 +1,13 @@
 from fastapi import FastAPI, status, HTTPException, APIRouter
-from ..models.models import User, UserResponse
+from ..models.models import User, UserResponse, UserUpdate,UserUpdateResponse
 from datetime import datetime
 from ..database.database import db
 from ..raw_sql import queries
 
 router = APIRouter()
+
+class InvalidInputError(Exception):
+    pass
 
 
 # @router.get("/users/", tags=["users"])
@@ -23,7 +26,6 @@ def home():
 def creat_user(user: User):
     new_user = UserResponse(
         **user.model_dump(),
-        #id = UserResponse.id,
         created_at = datetime.now(),
         updated_at = datetime.now()
     )
@@ -34,7 +36,9 @@ def creat_user(user: User):
         cursor.execute(queries.CREATE_USER, (user.username, user.email, user.password))
     
     return {
-        "data": new_user
+        "success": True,
+        "data": new_user,
+        "message": "New user created sucessfully"
     }
 
 @router.patch("/users/{user_id}")
@@ -49,5 +53,43 @@ def update_user(user_id: int, user: UserUpdate):
                 status_code = status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail = "User entered an invalid input"
             )
+    if user.username == None:
+        pass
+    if user.email == None:
+        pass
+    if user.password == None:
+        pass
     with db.get_cursor() as cursor:
-        cursor.execute(queries.UPDATE_USER, ())
+        cursor.execute(queries.UPDATE_USER, (user.username, user.email, user.password, user_id))
+    updated_user = UserUpdateResponse(
+        **user.model_dump(),
+        updated_at = datetime.now()
+    )
+
+    return {
+            "success": True,
+            "Data": updated_user,
+            "message": "User details updated successfully"
+        }
+
+@router.delete("/users/{user_id}")
+def delete_user(user_id: int):
+    try:
+        if not user_id:
+            raise InvalidInputError()
+        else:
+             with db.get_cursor() as cursor:
+                cursor.execute(queries.DELETE_USER, (user_id))
+        raise HTTPException(
+                    status_code = status.HTTP_204_NO_CONTENT,
+                    detail = "Deleted sucessfully!"
+                )
+    except InvalidInputError:
+        raise HTTPException(
+                status_code = status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail = "User entered an invalid input"
+            )
+    except Exception:
+        return {
+            "message": "Ops! something went wrong!"
+        }
