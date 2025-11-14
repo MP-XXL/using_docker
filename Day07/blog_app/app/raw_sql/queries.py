@@ -13,8 +13,8 @@ CREATE_USER = """
 INSERT INTO users(username, email, password) VALUES(%s, %s, %s);
 """
 
-CREATE_TODOS_TABLE = """
-CREATE TABLE IF NOT EXISTS todos(
+CREATE_POSTS_TABLE = """
+CREATE TABLE IF NOT EXISTS posts(
     id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
     title VARCHAR(255) UNIQUE NOT NULL,
     user_id INT NOT NULL,
@@ -24,14 +24,14 @@ CREATE TABLE IF NOT EXISTS todos(
 );
 """
 
-CREATE_TODO = """
-INSERT INTO todos(title, user_id) VALUES(%s, %s);
+CREATE_POST = """
+INSERT INTO posts(title, user_id) VALUES(%s, %s);
 """
-UPDATE_TODO = """
-UPDATE todos SET title = %s WHERE user_id = %s;
+UPDATE_POST = """
+UPDATE posts SET title = %s WHERE user_id = %s;
 """
-GET_ALL_TODOS = """
-SELECT * FROM todos;
+GET_ALL_POSTS = """
+SELECT * FROM posts;
 """
 
 UPDATE_USER = """
