@@ -3,30 +3,41 @@ version: "3.9"
 
 services:
   db:
-    image: mysql:9
+    image: mysql:8.0
     container_name: mysql_cont
     environment:
       MYSQL_ROOT_PASSWORD: ${ROOT_PASSWORD}
       MYSQL_DATABASE: ${MY_TODO_DB}
-      MYSQL_USER: user
-      MYSQL_PASSWORD: ${USER_PASSWORD}
 
     ports:
       - "3307:3306"
 
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   app:
     build: .
-    container_name: todoAPP_main
-    command: fastapi run main_app/main.py --host 0.0.0.0 --port 8000
+    container_name: todoapp_main
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
+      ROOT_PASSWORD: ${ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MY_TODO_DB}
+      DB_PASSWORD: ${DB_PASSWORD}
+      USER: ${USER}
       DATABASE_URL: ${DATABASE_URL}
+      
+    volumes:
+      - .:/app
 
 volumes:
   db_data:

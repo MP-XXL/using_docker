@@ -1,16 +1,14 @@
-from sqlmodel import Field, SQLModel, create_engine
-#from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-import pymysql
+import os
+from sqlalchemy import create_engine, Column, String, Integer
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session, sessionmaker
+
+DATABASE_URL = os.getenv("DATABASE_URL")
 
 
-DATABASE_URL = "mysql+pymysql://root:root1@localhost:3306/todoDB"
-
-
-engine = create_engine(DATABASE_URL, echo=True)
+engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-#Base = declarative_base()
-
+Base = declarative_base()
 
 def get_db():
     db = SessionLocal()
@@ -18,3 +16,4 @@ def get_db():
         yield db
     finally:
         db.close()
+

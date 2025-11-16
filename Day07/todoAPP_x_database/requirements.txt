@@ -1,4 +1,5 @@
 fastapi[standard]
-sqlmodel
-SQLAlchemy
+pydantic
+sqlalchemy
 pymysql
+cryptography
