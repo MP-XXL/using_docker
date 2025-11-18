@@ -1,12 +1,15 @@
-from fastapi import FastAPI, HTTPException
-from database.database import Base, engine
-from database_models.db_model import User, Todo
-from routes import user_routes, todo_routes
+from fastapi import FastAPI, status, HTTPException
+from .base import Base
+from .database import get_db, engine
+from .models.db_models import User
+from sqlalchemy.exc import OperationalError
+from .routes import users_routes
+import time
+
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
 
 def db_and_table_init():
     retries = 10
@@ -22,10 +25,14 @@ def db_and_table_init():
         except Exception as e:
             logger.info(f"DATABASE INITIALIZATION FAILED: {e}")
 
-app = FastAPI()
+app = FastAPI(
+    title = "PayIt App",
+    version = "0.0.1",
+    description = "market place..."
+    )
 
-app.include_router(user_routes.router)
-app.include_router(todo_routes.router)
+app.include_router(users_routes.router)
+#app.include_router(todo_routes.router)
 @app.on_event("startup")
 def on_startup():
     db_and_table_init()
