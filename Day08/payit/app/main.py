@@ -1,29 +1,14 @@
-from fastapi import FastAPI, status, HTTPException
-from .base import Base
-from .database import get_db, engine
-from .models.db_models import User
-from sqlalchemy.exc import OperationalError
-from .routes import users_routes
-import time
-
+from fastapi import FastAPI
+from .database import engine
+from .models.user import User
+from .models.base import Base
+from .routes.user import router as user_routes
 import logging
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-def db_and_table_init():
-    retries = 10
-    for i in range(retries):
-        try:
-            logger.info("STARTING APPLICATION!")
-            Base.metadata.create_all(bind=engine)
-            logger.info("DATABASE INITIALIZED SUCCESSFULLY!")
-            break
-        except OperationalError as e:
-            logger.warning(f"MySQL NOT READY, RETRYING ({i+1}/{retries})...")
-            time.sleep(3)
-        except Exception as e:
-            logger.info(f"DATABASE INITIALIZATION FAILED: {e}")
+# craete db tables
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title = "PayIt App",
@@ -31,9 +16,12 @@ app = FastAPI(
     description = "market place..."
     )
 
-app.include_router(users_routes.router)
-#app.include_router(todo_routes.router)
-@app.on_event("startup")
-def on_startup():
-    db_and_table_init()
+app.include_router(user_routes)
+
+@app.get("/")
+def home():
+    return {
+        "status": "success",
+        "message": "Hello world"
+    }
 

@@ -1,9 +1,10 @@
-import enum
+# ALl enums goes here
+from enum import Enum
 
-class Gender(enum.Enum):
-    MALE = "M"
-    FEMALE = "F"
+class Gender(Enum):
+    male = 'M'
+    female = 'F'
 
-class Category(enum.Enum):
-    FARMER = "farmer"
-    BUYER = "buyer"
+class Category(Enum):
+    buyer = 'buyer'
+    farmer = 'farmer'
