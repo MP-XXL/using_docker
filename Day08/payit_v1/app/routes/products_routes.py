@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from ..database import get_db
 from fastapi import APIRouter, HTTPException, status, Depends
-from ..models import products_model
+from ..models import products_model, users_model
 from ..schemas.products_schema import Product, ProductResponse
 from datetime import datetime
 from typing import List
@@ -14,10 +14,11 @@ router = APIRouter()
 
 @router.post("/products")
 def create_product(product: Product, db: Session = Depends(get_db)):
-    if db.query(products_model.Product).filter(products_model.Product.email == product.email).first():
+    new_product = db.query(users_model.User).filter(users_model.User.id == product.user_id).first()
+    if not new_product:
         raise HTTPException(
-            status_code = status.HTTP_409_CONFLICT,
-            detail = "Product email already exists!"
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = "User ID does not exists!"
         )
 
     new_product = products_model.Product(

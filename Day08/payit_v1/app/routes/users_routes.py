@@ -3,6 +3,7 @@ from ..database import get_db
 from fastapi import APIRouter, HTTPException, status, Depends
 from ..models import users_model
 from ..schemas.users_schema import User, UserResponse
+from ..middlewares.auth import AuthMiddleware
 from datetime import datetime
 from typing import List
 import logging
@@ -22,72 +23,79 @@ router = APIRouter(
 
 
 
-@router.post("/users")
-def create_user(user: User, db: Session = Depends(get_db)):
-    if db.query(users_models.User).filter(users_models.User.email == user.email).first():
-        raise HTTPException(
-            status_code = status.HTTP_409_CONFLICT,
-            detail = "User email already exists!"
-        )
+# @router.post("/users")
+# def create_user(user: User, db: Session = Depends(get_db)):
+#     if db.query(users_model.User).filter(users_model.User.email == user.email).first():
+#         raise HTTPException(
+#             status_code = status.HTTP_409_CONFLICT,
+#             detail = "User email already exists!"
+#         )
 
+#     salts = bcrypt.gensalt(rounds=12)
+#     hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), salts)
+
+#     new_user = users_model.User(
+#         **user.model_dump(exclude={"password"}),
+#         password=hashed_password.decode()
+#     )
+
+#     db.add(new_user)
+#     db.commit()
+#     db.refresh(new_user)
+#     return(new_user)
+
+
+@router.get("/me", status_code=status.HTTP_200_OK, response_model=UserResponse)
+def get_current_user(current_user = Depends(AuthMiddleware), db: Session = Depends(get_db)):
+    return current_user
+
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
+def create(user_request: User, db: Session = Depends(get_db)):
+
+    userExists = db.query(users_model.User).filter(
+        (user_request.email == users_model.User.email) | (user_request.phone == users_model.User.phone)
+    ).first()
+
+    if userExists:
+        raiseError("email or phone already exists")
+    
     salts = bcrypt.gensalt(rounds=12)
-    hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), salts)
-
-    new_user = users_models.User(
-        **user.model_dump(exclude={"password"}),
-        password=hashed_password.decode()
+    hashed_password = bcrypt.hashpw(user_request.password.encode('utf-8'), salts)
+    
+    new_user = users_model.User(
+        **user_request.dict(exclude={"password", "confirm_password", "gender", "category"}),
+        password=hashed_password.decode(),
+        gender = user_request.gender.value,
+        category = user_request.category.value
     )
 
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return(new_user)
+    try:  
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
 
-# @router.post("/", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
-# def create(user_request: User, db: Session = Depends(get_db)):
+        return new_user
+    except pymysql.DataError as e:
+        raiseError(e)
+    except Exception as e:
+        raiseError(e)
 
-#     userExists = db.query(User).filter(
-#         (user_request.email == User.email) | (user_request.phone == User.phone)
-#     ).first()
+def raiseError(e):
+    logger.error(f"failed to create record error: {e}")
+    raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail = {
+            "status": "error",
+            "message": f"failed to create user: {e}",
+            "timestamp": f"{datetime.utcnow()}"
+        }
+    )
 
-#     if userExists:
-#         raiseError("email or phone already exists")
-    
-#     salts = bcrypt.gensalt(rounds=12)
-#     hashed_password = bcrypt.hashpw(user_request.password.encode('utf-8'), salts)
-    
-#     new_user = User(
-#         **user_request.dict(exclude={"password", "confirm_password", "gender", "category"}),
-#         password=hashed_password.decode(),
-#         gender = user_request.gender.value,
-#         category = user_request.category.value
-#     )
 
-#     try:  
-#         db.add(new_user)
-#         db.commit()
-#         db.refresh(new_user)
-
-#         return new_user
-#     except pymysql.DataError as e:
-#         raiseError(e)
-#     except Exception as e:
-#         raiseError(e)
-
-# def raiseError(e):
-#     logger.error(f"failed to create record error: {e}")
-#     raise HTTPException(
-#         status_code=status.HTTP_400_BAD_REQUEST,
-#         detail = {
-#             "status": "error",
-#             "message": f"failed to create user: {e}",
-#             "timestamp": f"{datetime.utcnow()}"
-#         }
-#     )
 
 @router.get("/users/{user_id}")
 def get_a_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(users_models.User).filter(users_models.User.id == user_id).first()
+    user = db.query(users_model.User).filter(users_models.User.id == user_id).first()
     if not user:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
@@ -98,7 +106,7 @@ def get_a_user(user_id: int, db: Session = Depends(get_db)):
 
 @router.put("/users/{user_id}")
 def update_user(user_id: int, user: User, db: Session = Depends(get_db)):
-    updated_user = db.query(users_models.User).filter(users_models.User.id == user_id).first()
+    updated_user = db.query(users_model.User).filter(users_models.User.id == user_id).first()
     if not update_user:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
@@ -114,7 +122,7 @@ def update_user(user_id: int, user: User, db: Session = Depends(get_db)):
 
 @router.delete("/users/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
-    user_to_delete = db.query(users_models.User).filter(users_models.User.id == user_id).first()
+    user_to_delete = db.query(users_model.User).filter(users_models.User.id == user_id).first()
     if not user_to_delete:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
@@ -131,4 +139,4 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
 
 @router.get("/users", response_model=List[UserResponse])
 def get_all_users(db: Session=Depends(get_db)):
-    return db.query(users_models.User).all()
+    return db.query(users_model.User).all()

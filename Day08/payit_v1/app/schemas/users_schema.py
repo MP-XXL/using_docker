@@ -2,13 +2,14 @@ from pydantic import BaseModel, Field, EmailStr, validator, model_validator
 from datetime import datetime
 from ..enums import Gender, Category
 import re
-#from typing import List, Optional, Dict
+from typing import List, Optional, Dict
 
 class User(BaseModel):
     name: str = Field(min_length=3, max_length=30)
-    phone: str = Field(min_length=11)
+    phone: str = Field(min_length=11, pattern=r"\d")
     email: EmailStr
     password: str = Field(min_length=6)
+    confirm_password: str = Field(min_length=6)
     gender: Gender
     category: Category
     location: str = Field(min_length=1)
