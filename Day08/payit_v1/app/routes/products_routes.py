@@ -8,7 +8,7 @@ from typing import List
 
 
 
-router = APIRouter()
+router = APIRouter(tags=["Products"])
 
 
 

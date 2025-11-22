@@ -11,7 +11,6 @@ class User(BaseModel):
     password: str = Field(min_length=6)
     confirm_password: str = Field(min_length=6)
     gender: Gender
-    category: Category
     location: str = Field(min_length=1)
 
     @validator('phone')
@@ -54,5 +53,4 @@ class UserResponse(BaseModel):
     phone: str
     email: str
     gender: str
-    category: str
     location: str

@@ -3,9 +3,9 @@ from jose import jwt, JWTError
 from typing import Optional
 from datetime import timedelta, datetime
 
-SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'a5bd048044a171d1ac1d11fd2f214e98b19bfc2e23b63fb102bfd9a8d150c3f3')
-ACCESS_TOKEN_EXPIRATION_IN_MINUTES = os.getenv('JWT_EXPIRATION_TIME', 60) #in minutes
-ALGORITHM = os.getenv('JWT_ALGORITHM', 'HS256')
+SECRET_KEY = os.getenv('JWT_SECRET_KEY')
+ACCESS_TOKEN_EXPIRATION_IN_MINUTES = int(os.getenv('JWT_EXPIRATION_TIME'))
+ALGORITHM = os.getenv('JWT_ALGORITHM')
 
 
 # def verify_password(plain_text_password: str, hashed_password: str)-> bool: MOVED TO ROUTES AUTH

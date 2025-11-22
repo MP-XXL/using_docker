@@ -65,8 +65,7 @@ def create(user_request: User, db: Session = Depends(get_db)):
     new_user = users_model.User(
         **user_request.dict(exclude={"password", "confirm_password", "gender", "category"}),
         password=hashed_password.decode(),
-        gender = user_request.gender.value,
-        category = user_request.category.value
+        gender = user_request.gender.value
     )
 
     try:  
@@ -121,8 +120,8 @@ def update_user(user_id: int, user: User, db: Session = Depends(get_db)):
     return updated_user
 
 @router.delete("/users/{user_id}")
-def delete_user(user_id: int, db: Session = Depends(get_db)):
-    user_to_delete = db.query(users_model.User).filter(users_models.User.id == user_id).first()
+def delete_user(user_id: int = Depends(AuthMiddleware), db: Session = Depends(get_db)):
+    user_to_delete = db.query(users_model.User).filter(users_model.User.id == user_id.id).first()
     if not user_to_delete:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
