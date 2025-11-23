@@ -53,14 +53,14 @@ class JWTBearer(HTTPBearer):
             return user
 
         except Exception as e:
-            raiseHttpException(f"JWT verification failed: {e}")
+            self.raiseHttpException(f"JWT verification failed. Login session expired: {e}")
 
-    def raiseHttpException(e, status=status.HTTP_403_FORBIDDEN):
+    def raiseHttpException(self, e, status=status.HTTP_403_FORBIDDEN):
         raise HTTPException(
             status_code = status,
             detail = {
                 "message": e,
-                "timestamp": datetime.utcnow()
+                "timestamp": f"{datetime.utcnow()}"
                 }
         )
 
