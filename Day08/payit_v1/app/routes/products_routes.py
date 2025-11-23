@@ -61,9 +61,14 @@ def get_a_product(product_id: int, db: Session = Depends(get_db)):
 
 @router.put("/products/{product_id}") # REMEMBER TO CHECK IF A USER CAN UPDATE ANOTHER USER'S PRODUCT
 def update_product(product_id: int, product: Product, current_user=Depends(AuthMiddleware), db: Session = Depends(get_db)):
-    user = db.query(products_model.Product).filter(products_model.Product.farmer_id == current_user.id)
+    user = db.query(products_model.Product).filter(products_model.Product.farmer_id == current_user.id).first()
+    if not user:
+        raise HTTPException(
+            status_code = status.HTTP_404_NOT_FOUND,
+            detail = "Farmer with ID not found"
+        )
     updated_product = db.query(products_model.Product).filter(products_model.Product.id == product_id).first()
-    if not update_product: # == None: FIXXXXXXXXXXX
+    if not update_product:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
             detail = "Product with ID not found"

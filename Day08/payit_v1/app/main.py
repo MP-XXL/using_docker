@@ -8,7 +8,7 @@ from .models.buyers_model import Buyer
 from .models.orders_model import Order
 from .models.products_category_model import ProductCategory
 from sqlalchemy.exc import OperationalError
-from .routes import users_routes, products_routes, auth_routes
+from .routes import users_routes, products_routes, auth_routes, orders_routes
 #from .routes import admin
 import time
 
@@ -58,6 +58,7 @@ app = FastAPI(
 app.include_router(users_routes.router)
 app.include_router(products_routes.router)
 app.include_router(auth_routes.router)
+app.include_router(orders_routes.router)
 #app.include_router(admin.router)
 @app.on_event("startup")
 def on_startup():
