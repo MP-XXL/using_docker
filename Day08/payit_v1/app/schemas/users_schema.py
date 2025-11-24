@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field, EmailStr, validator, model_validator
+from fastapi import HTTPException, status
 from datetime import datetime
 from ..enums import Gender, Category
 import re
@@ -37,6 +38,26 @@ class User(BaseModel):
             raise ValueError('passwords must match')
         return self
 
+    @validator('name')
+    def check_for_numbers(cls, value):
+        if any(char.isdigit() for char in value):
+            raise HTTPException(
+                status_code = status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail = 'Name can not contain numbers'
+                )
+        return value
+    
+    @validator('name')
+    def validate_name(cls, value):
+        if value.isspace() is True:
+            raise HTTPException(
+                status_code = status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail = 'Name can not be blank!'
+                )
+        return value
+
+    
+
 
 # @field_validator('phone')
 # @classmethod
@@ -47,6 +68,17 @@ class User(BaseModel):
 #         return {
 #             "message": "Phone must be alphanumeric!"
 #         }
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    confirm_password: Optional[str] = None
+    gender: Optional[Gender] = None
+    location: Optional[str] = None
+
+
 class UserResponse(BaseModel):
     id: int
     name: str

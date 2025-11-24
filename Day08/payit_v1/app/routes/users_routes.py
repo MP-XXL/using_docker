@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from fastapi import APIRouter, HTTPException, status, Depends
 from ..models import users_model
-from ..schemas.users_schema import User, UserResponse
+from ..schemas.users_schema import User, UserResponse, UserUpdate
 from ..middlewares.auth import AuthMiddleware
 from datetime import datetime
 from typing import List
@@ -13,13 +13,9 @@ import pymysql
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
-    prefix="/users",
+    prefix="/payit",
     tags=["Users"]
 )
-
-
-
-# router = APIRouter()
 
 
 
@@ -49,7 +45,7 @@ router = APIRouter(
 def get_current_user(current_user = Depends(AuthMiddleware), db: Session = Depends(get_db)):
     return current_user
 
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
+@router.post("/users", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
 def create(user_request: User, db: Session = Depends(get_db)):
 
     userExists = db.query(users_model.User).filter(
@@ -91,10 +87,9 @@ def raiseError(e):
     )
 
 
-
 @router.get("/users/{user_id}")
 def get_a_user(user_id: int, db: Session = Depends(get_db)):
-    user = db.query(users_model.User).filter(users_models.User.id == user_id).first()
+    user = db.query(users_model.User).filter(users_model.User.id == user_id).first()
     if not user:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
@@ -104,8 +99,8 @@ def get_a_user(user_id: int, db: Session = Depends(get_db)):
     return user
 
 @router.put("/users")
-def update_user(current_user: int, user: User, db: Session = Depends(get_db)):
-    updated_user = db.query(users_model.User).filter(users_models.User.id == current_user.id).first()
+def update_user(user: UserUpdate, current_user = Depends(AuthMiddleware), db: Session = Depends(get_db)):
+    updated_user = db.query(users_model.User).filter(users_model.User.id == current_user.id).first()
     if not update_user:
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
@@ -113,7 +108,10 @@ def update_user(current_user: int, user: User, db: Session = Depends(get_db)):
         )
 
     for field, value in user.dict().items():
-        setattr(updated_user, field, value)
+        if value != None:
+            setattr(updated_user, field, value)
+        else:
+            pass
 
     db.commit()
     db.refresh(updated_user)
@@ -127,6 +125,8 @@ def delete_user(current_user = Depends(AuthMiddleware), db: Session = Depends(ge
             status_code = status.HTTP_404_NOT_FOUND,
             detail = "User with ID not found"
         )
+
+    return user_to_delete.id
 
 
     db.delete(user_to_delete)

@@ -19,3 +19,9 @@ class Category(enum.Enum):
     latex = "latex"
 
 category_names=["grains","tubers","cereals","fruits","livestock","vegetables","oils","latex"]
+
+
+class TransactionType(enum.Enum):
+    card = "card"
+    bank = "bank"
+    cash = "cash"

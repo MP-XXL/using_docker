@@ -6,6 +6,8 @@ from ..models import users_model
 from ..models import orders_model
 from ..models import buyers_model
 from ..models import products_model
+from ..models import farmers_model
+from ..models import users_model
 from ..schemas.orders_schema import Order
 import logging
 
@@ -23,6 +25,13 @@ def order_product(order: Order, current_user=Depends(AuthMiddleware), db: Sessio
         raise HTTPException(
             status_code = status.HTTP_404_NOT_FOUND,
             detail = "Product not found or out of stock"
+        )
+    farmer = db.query(farmers_model.Farmer).filter(farmers_model.Farmer.id == product_available.farmer_id).first()
+    user = db.query(users_model.User).filter(users_model.User.id == farmer.user_id).first()
+    if user.id == current_user.id:
+        raise HTTPException(
+            status_code = status.HTTP_400_BAD_REQUEST,
+            detail = "Can not purchase own product!"
         )
 
     new_buyer = db.query(buyers_model.Buyer).filter(buyers_model.Buyer.user_id == current_user.id)
