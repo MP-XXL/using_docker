@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 # HTTPBearer is responsible for extraction of  the bearer token from authorization headers
 security = HTTPBearer()
 
-class JWTBearer(HTTPBearer):
+class JWTBearer(HTTPBearer):  #The  bearer class handles decoding by base64
 
     def __init__(self, auto_error: bool = True):
         super().__init__(auto_error = auto_error)
@@ -27,16 +27,9 @@ class JWTBearer(HTTPBearer):
                 self.raiseHttpException("Invalid authorization scheme. expected \'Bearer\'")
 
             # verify token and get payload
-            # user = self.verify_jwt(credentials.credentials, db)
-            # if not user:
-            #     raiseHttpException("User does not exist!")
-
-            # return user
             return self.verify_jwt(credentials.credentials, db)
         else:
             raiseHttpException("message Invalid or expired token")
-
-
 
     def verify_jwt(self, token: str, db: Session):
         try:

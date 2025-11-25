@@ -137,5 +137,5 @@ def delete_user(current_user = Depends(AuthMiddleware), db: Session = Depends(ge
     )
 
 @router.get("/users", response_model=List[UserResponse])
-def get_all_users(db: Session=Depends(get_db)):
+def get_all_users(current_user = Depends(AuthMiddleware), db: Session=Depends(get_db)):
     return db.query(users_model.User).all()
