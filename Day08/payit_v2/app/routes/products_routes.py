@@ -10,6 +10,12 @@ import os
 import aiofiles
 from ..enums import Category
 from uuid import uuid4
+import pymysql
+
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 
@@ -20,17 +26,23 @@ UPLOAD_DIR = "app/static/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
+class FileTooLargeError(Exception):
+    pass
+
+
 
 @router.post("/products")
 async def create_product(
     name: str = Form(...),
-    image_url: UploadFile = File(...),
+    image: UploadFile = File(...),
     description: str = Form(...),
     category: Category = Form(...),
     unit_price: int = Form(...),
     quantity: int = Form(...),
     current_user=Depends(AuthMiddleware),
     db: Session = Depends(get_db)):
+
+
     
     # user = db.query(users_model.User).filter(users_model.User.id == current_user.id).first()
     # if not new_product:
@@ -39,7 +51,8 @@ async def create_product(
     #         detail = "User ID does not exists!"
     #     )
 
-    allowed_extns = ["png", "jpeg", "jp"]
+   
+    allowed_extns = ["png", "jpeg", "jpg"]
 
     file_extn = image.filename.split(".")[-1].lower()
     if not file_extn in allowed_extns:
@@ -51,21 +64,19 @@ async def create_product(
 
         async with aiofiles.open(file_path, "wb") as output_file:
             content = await image.read()
+            file_size = len(content)
+            if file_size > 5000000:
+                raise FileTooLargeError()
             await output_file.write(content)
+    
+    except FileTooLargeError:
+        return {
+            "message": "File size must not be greater than 5MB"
+        }
         
     except Exception as e:
         raiseError("Internal Server Erro", status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-def raiseError(e, status_code):
-    logger.error(f"failed to created record error: {e}")
-    raise HTTPException(
-        status_code = status_code,
-        detail = {
-            "status": "error",
-            "message": f"{e}",
-            "timestamp": f"{datetime.utcnow()}"
-        }
-    )
  
     db_farmer = db.query(farmers_model.Farmer).filter(farmers_model.Farmer.user_id == current_user.id).first()
     if not db_farmer:
@@ -76,7 +87,7 @@ def raiseError(e, status_code):
     
     db_category = db.query(products_category_model.ProductCategory).filter(products_category_model.ProductCategory.category_name == category.value).first()
     if not db_category:
-        db_category = products_category_model.ProductCategory(category_name=product.category.value)
+        db_category = products_category_model.ProductCategory(category_name=category.value)
         db.add(db_category)
         db.commit()
         db.refresh(db_category)
@@ -90,8 +101,11 @@ def raiseError(e, status_code):
             description = description,
             image_url= image_url,
             farmer_id = db_farmer.id,
-            category_id = db_category.id
+            category_id = db_category.id,
+            unit_price = unit_price,
+            quantity= quantity
             )
+        
 
         db.add(new_product)
         db.commit()
@@ -103,6 +117,17 @@ def raiseError(e, status_code):
             }
     except pymysql.DataError as e:
         raiseError(e, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+def raiseError(e, status_code):
+    logger.error(f"failed to created record error: {e}")
+    raise HTTPException(
+        status_code = status_code,
+        detail = {
+            "status": "error",
+            "message": f"{e}",
+            "timestamp": f"{datetime.utcnow()}"
+        }
+    )
 
 
 @router.get("/products/{product_id}")
