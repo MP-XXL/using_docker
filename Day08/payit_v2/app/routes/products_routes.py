@@ -22,11 +22,11 @@ logger = logging.getLogger(__name__)
 router = APIRouter(tags=["Products"])
 
 
-UPLOAD_DIR = "app/static/uploads"
+UPLOAD_DIR = "static/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
-class FileTooLargeError(Exception):
+class ImageTooLargeError(Exception):
     pass
 
 
@@ -66,10 +66,10 @@ async def create_product(
             content = await image.read()
             file_size = len(content)
             if file_size > 5000000:
-                raise FileTooLargeError()
+                raise ImageTooLargeError()
             await output_file.write(content)
     
-    except FileTooLargeError:
+    except ImageTooLargeError:
         return {
             "message": "File size must not be greater than 5MB"
         }

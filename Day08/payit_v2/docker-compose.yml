@@ -50,6 +50,19 @@ services:
       timeout: 5s
       retries: 10
       start_period: 30s
+  
+  phpmyadmin:
+    container_name: phpmyadmin_container
+    image: phpmyadmin:latest
+    environment:
+      PMA_HOST: ${DB_HOST}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8080:80"
+    depends_on:
+      payit_db:
+        condition: service_healthy
+
     
 volumes:
   payit_db_data:

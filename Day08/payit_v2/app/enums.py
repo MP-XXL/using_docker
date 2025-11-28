@@ -18,8 +18,6 @@ class Category(enum.Enum):
     oils = "oils"
     latex = "latex"
 
-category_names=["grains","tubers","cereals","fruits","livestock","vegetables","oils","latex"]
-
 
 class TransactionType(enum.Enum):
     card = "card"

@@ -45,7 +45,7 @@ app.include_router(auth_routes.router)
 app.include_router(orders_routes.router)
 
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 #app.include_router(admin.router)
 @app.on_event("startup")
 def on_startup():
