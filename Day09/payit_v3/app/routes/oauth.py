@@ -34,7 +34,6 @@ async def login(request: Request):
 
 @router.get("/callback", name="callback")
 async def callback(request: Request, db: Session = Depends(get_db)):
-    print("HELLO")
     try:
         print("WORLD")
         token = await oauth.auth0.authorize_access_token(request)
@@ -90,4 +89,4 @@ def logout(request: Request):
         f"returnTo={return_url}"
     )
 
-    return RedirectResponse(request, url=logout_url)
+    return RedirectResponse(url=logout_url)
