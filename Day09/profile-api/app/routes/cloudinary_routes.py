@@ -99,9 +99,10 @@ async def handle_upload(image: UploadFile = File(...), current_user=Depends(Auth
 @router.delete("/users")
 async def delete_image(current_user = Depends(AuthMiddleware), db: Session = Depends(get_db)):
     url_to_delete = db.query(profile_pictures_model.Image).filter(profile_pictures_model.Image.user_id == current_user.id).first()
-    destroy(url_to_delete.public_id)
+    if url_to_delete != None:
+        destroy(url_to_delete.public_id)
     
-    user_to_delete = db.query(users_model.User).filter(users_model.User.id == url_to_delete.user_id).first()
+    user_to_delete = db.query(users_model.User).filter(users_model.User.id == current_user.id).first()
     if user_to_delete:
         db.delete(user_to_delete)
         db.commit()
