@@ -45,6 +45,15 @@ class UserExistError(Exception):
 
 @router.post("/users")
 async def handle_upload(image: UploadFile = File(...), current_user=Depends(AuthMiddleware), db:Session=Depends(get_db)):
+
+    allowed_extns = ["png", "jpeg", "jpg"]
+
+    file_extn = image.filename.split(".")[-1].lower()
+    if not file_extn in allowed_extns:
+        raise HTTPException(
+            status_code = status.HTTP_400_BAD_REQUEST,
+            detail = "Invalid file extention. Change file to supported type")
+
     if db.query(profile_pictures_model.Image).filter(profile_pictures_model.Image.user_id == current_user.id).first():
             raise HTTPException(
             status_code = status.HTTP_409_CONFLICT,
