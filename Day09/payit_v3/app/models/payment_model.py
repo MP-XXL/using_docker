@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, DateTime, ForeignKey, String, func, Enum, DECIMAL
-from .base import Base
-from ..enums import TransactionType
+from base import Base
+from enums import TransactionType
 
 class Payment(Base):
     __tablename__ = 'payments'

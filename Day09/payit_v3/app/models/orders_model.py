@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, DateTime, ForeignKey, String, func, DECIMAL, Enum
-from ..enums import OrderStatus
+from enums import OrderStatus
 from .base import Base
 
 class Order(Base):

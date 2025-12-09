@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from ..database import get_db
-from ..middlewares.auth import AuthMiddleware
-from ..models import users_model
-from ..models import orders_model
-from ..models import buyers_model
-from ..models import products_model
-from ..models import farmers_model
-from ..models import users_model
-from ..schemas.orders_schema import Order
+from database import get_db
+from middlewares.auth import AuthMiddleware
+from models import users_model
+from models import orders_model
+from models import buyers_model
+from models import products_model
+from models import farmers_model
+from models import users_model
+from schemas.orders_schema import Order
 import logging
 
 logging.basicConfig(level=logging.INFO)

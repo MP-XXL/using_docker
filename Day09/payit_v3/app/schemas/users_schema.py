@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, EmailStr, validator, model_validator
 from fastapi import HTTPException, status
 from datetime import datetime
-from ..enums import Gender, Category
+from enums import Gender, Category
 import re
 from typing import List, Optional, Dict
 

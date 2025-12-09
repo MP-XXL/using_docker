@@ -1,12 +1,12 @@
 from sqlalchemy.orm import Session
-from ..database import get_db
+from database import get_db
 from fastapi import APIRouter, HTTPException, status, Depends, Request
-from ..models import users_model
-from ..schemas.users_schema import User, UserResponse, UserUpdate
-from ..middlewares.auth import AuthMiddleware
+from models import users_model
+from schemas.users_schema import User, UserResponse, UserUpdate
+from middlewares.auth import AuthMiddleware
 from fastapi.responses import RedirectResponse
-from ..config.oauth import oauth, AUTH0_DOMAIN, AUTH0_CLIENT_ID
-from ..auth.jwt import create_access_token
+from config.oauth import oauth, AUTH0_DOMAIN, AUTH0_CLIENT_ID
+from auth.jwt import create_access_token
 from datetime import datetime
 from typing import List
 import logging

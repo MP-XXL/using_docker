@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, validator
 from datetime import datetime
-from ..enums import Category
+from enums import Category
 
 class Product(BaseModel):
     name: str = Field(min_length=2)

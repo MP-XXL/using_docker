@@ -1,14 +1,14 @@
 from fastapi import FastAPI, status, HTTPException
-from .models.base import Base
-from .database import engine
-from .models.users_model import User
-from .models.products_model import Product
-from .models.farmers_model import Farmer
-from .models.buyers_model import Buyer
-from .models.orders_model import Order
-from .models.products_category_model import ProductCategory
+from models.base import Base
+from database import engine
+from models.users_model import User
+from models.products_model import Product
+from models.farmers_model import Farmer
+from models.buyers_model import Buyer
+from models.orders_model import Order
+from models.products_category_model import ProductCategory
 from sqlalchemy.exc import OperationalError
-from .routes import users_routes, products_routes, auth_routes, orders_routes, oauth
+from routes import users_routes, products_routes, auth_routes, orders_routes, oauth
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -69,7 +69,7 @@ app.add_middleware(
 
 )
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 #app.include_router(admin.router)
 @app.on_event("startup")
 def on_startup():

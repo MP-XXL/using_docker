@@ -1,6 +1,6 @@
 import os
 from sqlalchemy import create_engine
-from .models.base import Base
+from models.base import Base
 from sqlalchemy.orm import Session, sessionmaker
 
 DB_USER = os.getenv("DB_USER")

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, DateTime, ForeignKey, String, func, Enum, DECIMAL, Text
 from .base import Base
-from ..enums import Category
+from enums import Category
 
 class Product(Base):
     __tablename__ = 'products'

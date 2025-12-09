@@ -20,8 +20,8 @@ services:
       - AUTH0_CLIENT_SECRET=${AUTH0_CLIENT_SECRET}
       - AUTH0_CALLBACK_URL=${AUTH0_CALLBACK_URL}
     volumes:
-      - ./app:/app/app
-      - .app/static/uploads:/app/app/static/uploads
+      - ./app:/app
+      - .app/static/uploads:/app/static/uploads
     depends_on:
       payit_db:
         condition: service_healthy

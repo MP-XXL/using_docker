@@ -1,14 +1,14 @@
 from sqlalchemy.orm import Session
-from ..database import get_db
+from database import get_db
 from fastapi import APIRouter, HTTPException, status, Depends, UploadFile, File, Form
-from ..models import products_model, users_model, farmers_model, buyers_model, products_category_model
-from ..schemas.products_schema import Product, ProductResponse
-from ..middlewares.auth import AuthMiddleware
+from models import products_model, users_model, farmers_model, buyers_model, products_category_model
+from schemas.products_schema import Product, ProductResponse
+from middlewares.auth import AuthMiddleware
 from datetime import datetime
 from typing import List
 import os
 import aiofiles
-from ..enums import Category
+from enums import Category
 from uuid import uuid4
 import pymysql
 
